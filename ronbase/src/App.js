@@ -4,6 +4,7 @@ import rates from "./rates.json";
 import { Chart as ChartJS } from 'chart.js/auto'
 import { Chart }            from 'react-chartjs-2'
 import { Line } from "react-chartjs-2";
+import { Colors } from 'chart.js';
 
 function App() {
   const [currencies, setCurrencies] = useState([]);
@@ -11,6 +12,15 @@ function App() {
   const [filteredCurrencies, setFilteredCurrencies] = useState([]);
   const [selectedCurrencies, setSelectedCurrencies] = useState([]);
   const [chartData, setChartData] = useState(null);
+
+  function getRandomColor() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
 
   useEffect(() => {
     const currencyArr = Object.keys(rates).map((currency) => ({
@@ -34,6 +44,14 @@ function App() {
   }, [searchValue, currencies]);
 
   useEffect(() => {
+    const storedCurrencies = localStorage.getItem("selectedCurrencies");
+    if (storedCurrencies) {
+      setSelectedCurrencies(JSON.parse(storedCurrencies));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("selectedCurrencies", JSON.stringify(selectedCurrencies));
     const selectedData = selectedCurrencies.map((currency) => {
       const currencyData = currencies.find((obj) => obj.currency === currency);
       return {
@@ -41,11 +59,8 @@ function App() {
         data: currencyData.rate,
       };
     });
-
     setChartData(selectedData);
   }, [selectedCurrencies, currencies]);
-
-  let sign = "->";
 
   const openSearch = (input) => {
     setSearchValue(input.target.value);
@@ -62,27 +77,25 @@ function App() {
   return (
     <div className="main">
       <div className="chart">
-        <h2>Rate History</h2>
+        <div className="chart-title">
+          <h2>RONBASE</h2>
+          <p>All changes saved in local storage.</p>
+        </div>
+        <span className="blob"></span>
+        <span className="blob2">.</span>
+        <div className="chart-real">
           {chartData && (
             <Line
               data={{
                 // labels: rates.USD.map((entry) => entry.date), // Assuming USD is present in the rates.json file, you can change this to any currency
                 datasets: chartData,
-                labels: ["Ieri", "Azi", 'da', 'da', 'da'],
-                fill: true,
-                tension: 0.2
-                // datasets: [{
-                //   type: 'line',
-                //   label: 'My First Dataset',
-                //   data: [65, 59, 80, 81, 56, 55, 40],
-                //   // data: [chartData],
-                //   fill: false,
-                //   borderColor: 'rgb(75, 192, 192)',
-                //   tension: 0.1
-
-                // }]
+                labels: ["15.05", "16.05", '17.05', '18.05'],
               }}
               options={{
+                // colors: {
+                //   // enabled: false
+                //   forceOverride: true
+                // },
                 maintainAspectRatio: true,
                 scales: {
                   x: {
@@ -95,48 +108,66 @@ function App() {
                 },
                 elements: {
                   line: {
-                    lineColor: 'rgba(255, 255, 255, 1)', // Set the line color to white
+                    tension: 0.1, // Adjust the tension of the line
+                    borderWidth: 2, // Set the border width of the line
+                    borderColor: [
+  "#45AAB4", "#1DBF79", "#FFD700", "#FF5733",
+  "#8A2BE2", "#FF1493", "#008000", "#FF4500", "#00FFFF",
+  "#FFFF00", "#4169E1", "#7FFFD4", "#FF00FF", "#00FF00",
+  "#FF0000", "#800000", "#008080", "#800080", "#000080"
+], // Set the border color to white
+                    // backgroundColor: getRandomColor, // Set the background color to transparent
+                    // fill: getRandomColor
                   },
                 },
               }}
             />
           )}
+
+        </div>
       </div>
       
       <div className="search">
-        <input
-          type="text"
-          placeholder="Cauta"
-          autoComplete="false"
-          autoCapitalize="false"
-          value={searchValue}
-          onChange={(e) => openSearch(e)}
-        />
-        <div className="modal-search" id="modal-search">
-          <h2>Select currency</h2>
-          {filteredCurrencies.map((currencyObj) => (
-            <div
-              key={currencyObj.currency}
-              onClick={() => handleCurrencyClick(currencyObj.currency)}
-              style={{
-                border: selectedCurrencies.includes(currencyObj.currency) ? "2px solid black" : "none",
-              }}
-            >
-              {currencyObj.currency}:{" "}
-              <span
-                style={{
-                  color:
-                    currencyObj.rate[1] < currencyObj.rate[currencyObj.rate.length - 2]
-                      ? "yellow"
-                      : currencyObj.rate[1] > currencyObj.rate[currencyObj.rate.length - 2]
-                      ? "red"
-                      : "inherit",
-                }}
-              >
-                {currencyObj.rate[1]}
-              </span>
+        <div className="search-real">
+          <div className="input">
+              <input
+                type="text"
+                placeholder="Cauta"
+                autoComplete="false"
+                autoCapitalize="false"
+                value={searchValue}
+                onChange={(e) => openSearch(e)}
+              />
+          </div>
+          <div className="currencies">
+            <div className="modal-search" id="modal-search">
+              {filteredCurrencies.map((currencyObj) => (
+                <div className="currency"
+                  key={currencyObj.currency}
+                  onClick={() => handleCurrencyClick(currencyObj.currency)}
+                  style={{
+                    border: selectedCurrencies.includes(currencyObj.currency) ? "2px solid white" : "2px solid #2e3032",
+                    backgroundColor: selectedCurrencies.includes(currencyObj.currency) ? "#353434" : "#1E1E1E",
+                  }}
+                >
+                  {currencyObj.currency}: {" "}
+                  <span
+                    style={{
+                      color:
+                        currencyObj.rate[currencyObj.rate.length-1] < currencyObj.rate[currencyObj.rate.length - 2]
+                          ? "gold"
+                          : currencyObj.rate[currencyObj.rate.length-1] > currencyObj.rate[currencyObj.rate.length - 2]
+                          ? "red"
+                          : "inherit",
+                    }}
+                  >
+                    {currencyObj.rate[currencyObj.rate.length-1]}
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
+
+          </div>
         </div>
       </div>
     </div>
