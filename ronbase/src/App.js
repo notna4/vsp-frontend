@@ -72,57 +72,66 @@ function App() {
     } else {
       setSelectedCurrencies([...selectedCurrencies, currency]);
     }
+
+    document.getElementById("alert").style.visibility = "visible";
+    setTimeout(() => {
+      document.getElementById("alert").style.visibility = "hidden";
+    }, 2000)
   };
 
   return (
     <div className="main">
+      <div className="alert" id="alert">
+        <p>Saved to local storage</p>
+      </div>
       <div className="chart">
-        <div className="chart-title">
-          <h2>RONBASE</h2>
-          <p>All changes saved in local storage.</p>
-        </div>
-        <span className="blob"></span>
-        <span className="blob2">.</span>
-        <div className="chart-real">
-          {chartData && (
-            <Line
-              data={{
-                // labels: rates.USD.map((entry) => entry.date), // Assuming USD is present in the rates.json file, you can change this to any currency
-                datasets: chartData,
-                labels: ["15.05", "16.05", '17.05', '18.05'],
-              }}
-              options={{
-                // colors: {
-                //   // enabled: false
-                //   forceOverride: true
-                // },
-                maintainAspectRatio: true,
-                scales: {
-                  x: {
-                    type: 'category',
-                    ticks: {
-                      autoSkip: true,
-                      maxTicksLimit: 10, // Adjust the maximum number of ticks to display
+        <div className="chart">
+          <div className="chart-title">
+            <h2>RONBASE</h2>
+          </div>
+          {/* <span className="blob">.</span> */}
+          <div className="chart-real">
+            {chartData && (
+              <Line
+                data={{
+                  // labels: rates.USD.map((entry) => entry.date), // Assuming USD is present in the rates.json file, you can change this to any currency
+                  datasets: chartData,
+                  labels: ["15.05", "16.05", '17.05', '18.05'],
+                }}
+                options={{
+                  // colors: {
+                  //   // enabled: false
+                  //   forceOverride: true
+                  // },
+                  maintainAspectRatio: true,
+                  scales: {
+                    x: {
+                      type: 'category',
+                      ticks: {
+                        autoSkip: true,
+                        maxTicksLimit: 10, // Adjust the maximum number of ticks to display
+                      },
                     },
                   },
-                },
-                elements: {
-                  line: {
-                    tension: 0.1, // Adjust the tension of the line
-                    borderWidth: 2, // Set the border width of the line
-                    borderColor: [
-  "#45AAB4", "#1DBF79", "#FFD700", "#FF5733",
-  "#8A2BE2", "#FF1493", "#008000", "#FF4500", "#00FFFF",
-  "#FFFF00", "#4169E1", "#7FFFD4", "#FF00FF", "#00FF00",
-  "#FF0000", "#800000", "#008080", "#800080", "#000080"
-], // Set the border color to white
-                    // backgroundColor: getRandomColor, // Set the background color to transparent
-                    // fill: getRandomColor
+                  elements: {
+                    line: {
+                      tension: 0.1, // Adjust the tension of the line
+                      borderWidth: 2, // Set the border width of the line
+                      borderColor: [
+    "#45AAB4", "#1DBF79", "#FFD700", "#FF5733",
+    "#8A2BE2", "#FF1493", "#008000", "#FF4500", "#00FFFF",
+    "#FFFF00", "#4169E1", "#7FFFD4", "#FF00FF", "#00FF00",
+    "#FF0000", "#800000", "#008080", "#800080", "#000080"
+  ], // Set the border color to white
+                      // backgroundColor: getRandomColor, // Set the background color to transparent
+                      // fill: getRandomColor
+                    },
                   },
-                },
-              }}
-            />
-          )}
+                }}
+              />
+            )}
+
+          </div>
 
         </div>
       </div>
@@ -136,6 +145,7 @@ function App() {
                 autoComplete="false"
                 autoCapitalize="false"
                 value={searchValue}
+                onClick={(e) => {e.target.value = ''; openSearch(e);}}
                 onChange={(e) => openSearch(e)}
               />
           </div>
@@ -150,7 +160,7 @@ function App() {
                     backgroundColor: selectedCurrencies.includes(currencyObj.currency) ? "#353434" : "#1E1E1E",
                   }}
                 >
-                  {currencyObj.currency}: {" "}
+                  {currencyObj.currency}:&nbsp;
                   <span
                     style={{
                       color:
@@ -161,7 +171,12 @@ function App() {
                           : "inherit",
                     }}
                   >
-                    {currencyObj.rate[currencyObj.rate.length-1]}
+                    {currencyObj.rate[currencyObj.rate.length-1]}&nbsp;
+                    {currencyObj.rate[currencyObj.rate.length - 1] > currencyObj.rate[currencyObj.rate.length - 2] ? (
+                      <span>&#8593;</span>
+                    ) : (
+                      <span>&#8595;</span>
+                    )}
                   </span>
                 </div>
               ))}
